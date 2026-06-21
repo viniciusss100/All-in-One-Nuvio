@@ -1,5 +1,5 @@
 {
-  "name": "NetMirror",
+  "name": "All-in-One-Nuvio",
   "version": "1.0.0",
   "scrapers": [
     {
@@ -13,7 +13,7 @@
       "enabled": true,
       "formats": ["mp4", "m3u8", "mkv"],
       "logo": "https://i.postimg.cc/L64M3bYV/netmirror.png",
-      "contentLanguage": ["en", "hi", "ta", "te"]
+      "contentLanguage": ["pt", "pt-br"]
     }
   ]
 }
