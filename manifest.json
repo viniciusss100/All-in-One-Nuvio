@@ -1,5 +1,5 @@
 {
-  "name": "All-in-One-Nuvio",
+  "name": "NetMirror",
   "version": "1.0.0",
   "scrapers": [
     {
@@ -13,33 +13,7 @@
       "enabled": true,
       "formats": ["mp4", "m3u8", "mkv"],
       "logo": "https://i.postimg.cc/L64M3bYV/netmirror.png",
-      "contentLanguage": ["pt", "pt-br"]
-    },
-    {
-      "id": "peachify",
-      "name": "🍑 Peachify",
-      "description": "Streams from peachify.top — 3 server sources (MovieBox/Holly/Air) via Cloudflare Workers with AES-256-GCM decryption",
-      "version": "1.0.0",
-      "author": "piratezoro9",
-      "supportedTypes": ["movie", "tv"],
-      "filename": "providers/peachify.js",
-      "enabled": true,
-      "formats": ["m3u8", "mp4"],
-      "logo": "https://i.postimg.cc/tCz8CDH3/peachify.png",
-      "contentLanguage": ["en", "hi", "te","ta", "pt"]
-    },
-    {
-      "id": "torrentio",
-      "name": "🧲 Torrentio",
-      "description": "Movies and shows streaming",
-      "version": "1.0.0",
-      "author": "Phisher",
-      "supportedTypes": ["movie", "tv"],
-      "filename": "providers/torrentio.js",
-      "enabled": true,
-      "formats": ["mp4", "m3u8"],
-      "logo": "https://i.postimg.cc/ZRYTCy0T/torrentio.png",
-      "contentLanguage": ["en", "hi"]
+      "contentLanguage": ["en", "hi", "ta", "te"]
     }
   ]
 }
