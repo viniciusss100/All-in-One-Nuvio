@@ -129,11 +129,13 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
         const directUrl = await getGeekAntenadoData(params).catch(() => null);
         
         if (directUrl && (directUrl.includes('.mp4') || directUrl.includes('.m3u8') || directUrl.startsWith('http'))) {
+          let resolution = directUrl.includes('FHD') ? '1080p' : (directUrl.includes('HD') ? '720p' : 'Auto');
+          let lang = (r.slug && r.slug.includes('legendado')) ? 'Legendado' : (r.slug && r.slug.includes('dublado') ? 'Dublado' : 'PT-BR / Multi');
           streams.push({
             name: 'BrazucaPlay',
-            title: 'Servidor ' + r.id + ' (Geek)',
+            title: 'Servidor ' + r.id + ' (Geek)\n📺 ' + resolution + ' | 🗣️ ' + lang,
             url: directUrl,
-            quality: directUrl.includes('FHD') ? '1080p' : (directUrl.includes('HD') ? '720p' : 'Auto'),
+            quality: resolution,
             size: 'Unknown',
             headers: HEADERS,
             provider: 'brazucaplay'
@@ -161,7 +163,7 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
       // Adicionamos o Embed.su (Multi-legendas incluindo PT-BR)
       streams.push({
          name: 'BrazucaPlay',
-         title: 'Servidor Global (Multi-Subs)',
+         title: 'Servidor Global\n📺 Auto | 🗣️ Multi-Subs',
          url: embedSu,
          quality: 'Auto',
          size: 'Unknown',
@@ -171,7 +173,7 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
       // Adicionamos o WarezCDN (PT-BR) para quando o domínio voltar a estabilizar
       streams.push({
          name: 'BrazucaPlay',
-         title: 'Servidor Warez (PT-BR)',
+         title: 'Servidor Warez\n📺 Auto | 🗣️ PT-BR',
          url: warezCdn,
          quality: 'Auto',
          size: 'Unknown',
