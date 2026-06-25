@@ -1,12 +1,12 @@
 /**
- * Anitube - Nuvio Provider (Fixed Build based on AnimesDigital logic)
+ * Anitube - Nuvio Provider (Fixed Build based on Anitube.zip / Stremio Addon logic)
  */
 "use strict";
 
 var TMDB_API_KEY = "68e094699525b18a70bab2f86b1fa706";
-var BASE_URL = "https://www.anitube.vip";
+var BASE_URL = "https://www.anitube.zip";
 var PROVIDER_TAG = "Anitube";
-var PROVIDER_VERSION = "2.0.0";
+var PROVIDER_VERSION = "3.0.0";
 var USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/137.0.0.0 Safari/537.36";
 
 var __async = function (__this, __arguments, generator) {
@@ -47,28 +47,12 @@ function fetchJson(url, opts) {
 }
 
 // ─────────────────────────────────────────────
-// Slug utilities (from AnimesDigital)
+// Slug utilities
 // ─────────────────────────────────────────────
-var STOPWORDS = {
-  a: 1, o: 1, os: 1, as: 1, de: 1, do: 1, da: 1, dos: 1, das: 1,
-  the: 1, of: 1, and: 1, e: 1, "no": 1, na: 1, nos: 1, nas: 1,
-  to: 1, in: 1, on: 1, at: 1, for: 1, ni: 1, wa: 1, ga: 1, wo: 1, ka: 1,
-};
-
 function normalize(str) {
   if (!str) return "";
   str = str.toLowerCase();
-  str = str.replace(/[áàâãä]/g, "a")
-           .replace(/[éèêë]/g, "e")
-           .replace(/[íìîï]/g, "i")
-           .replace(/[óòôõö]/g, "o")
-           .replace(/[úùûü]/g, "u")
-           .replace(/[ç]/g, "c")
-           .replace(/[ñ]/g, "n")
-           .replace(/[:：]/g, " ")
-           .replace(/[^a-z0-9\s-]/g, " ")
-           .replace(/\s+/g, " ")
-           .trim();
+  str = str.replace(/[áàâãä]/g, "a").replace(/[éèêë]/g, "e").replace(/[íìîï]/g, "i").replace(/[óòôõö]/g, "o").replace(/[úùûü]/g, "u").replace(/[ç]/g, "c").replace(/[ñ]/g, "n").replace(/[:：]/g, " ").replace(/[^a-z0-9\s-]/g, " ").replace(/\s+/g, " ").trim();
   return str;
 }
 
@@ -77,17 +61,11 @@ function slugify(str) {
 }
 
 function slugBody(slug) {
-  return slug
-    .replace(/-dublado$/, "")
-    .replace(/-legendado$/, "")
-    .replace(/-online$/, "")
-    .replace(/-[0-9]+$/, "");
+  return slug.replace(/-dublado$/, "").replace(/-legendado$/, "").replace(/-online$/, "").replace(/-[0-9]+$/, "");
 }
 
 function buildExpectedRoots(tmdbInfo) {
-  var titles = [tmdbInfo.title, tmdbInfo.originalTitle]
-    .concat(tmdbInfo.altTitles || [])
-    .filter(Boolean);
+  var titles = [tmdbInfo.title, tmdbInfo.originalTitle].concat(tmdbInfo.altTitles || []).filter(Boolean);
   var roots = [];
   var seen = {};
   function push(s) { if (s && !seen[s]) { seen[s] = 1; roots.push(s); } }
@@ -96,9 +74,7 @@ function buildExpectedRoots(tmdbInfo) {
     if (!base) continue;
     push(base);
     push(base.replace(/^the-/, ""));
-    var afterColon = titles[i].indexOf(":") !== -1
-      ? titles[i].split(":").slice(1).join(":")
-      : "";
+    var afterColon = titles[i].indexOf(":") !== -1 ? titles[i].split(":").slice(1).join(":") : "";
     if (afterColon) {
       var slug = slugify(afterColon);
       if (slug) push(slug);
@@ -110,21 +86,18 @@ function buildExpectedRoots(tmdbInfo) {
 function isStrictMatch(slug, expectedRoots) {
   if (!slug) return false;
   var body = slugBody(slug);
-
   for (var i = 0; i < expectedRoots.length; i++) {
     var root = expectedRoots[i];
     if (!root) continue;
     if (body === root) return true;
     if (body.indexOf(root + "-") === 0) return true;
   }
-
   for (var j = 0; j < expectedRoots.length; j++) {
     var r2 = expectedRoots[j];
     if (!r2 || r2.length < 6) continue;
     if (body.indexOf("-" + r2 + "-") !== -1) return true;
     if (body.length > r2.length && body.substring(body.length - r2.length - 1) === "-" + r2) return true;
   }
-
   return false;
 }
 
@@ -135,7 +108,6 @@ function getTmdbInfo(tmdbId, type) {
   return __async(this, null, function* () {
     var cleanId = String(tmdbId).replace(/[^a-zA-Z0-9]/g, ""); 
     var isImdb = cleanId.indexOf("tt") === 0;
-
     var d = null;
     if (isImdb) {
        var findUrl = "https://api.themoviedb.org/3/find/" + cleanId + "?api_key=" + TMDB_API_KEY + "&external_source=imdb_id&language=pt-BR";
@@ -146,16 +118,13 @@ function getTmdbInfo(tmdbId, type) {
        if (!d) return null;
        cleanId = d.id;
     }
-
     var path = type === "tv" ? "tv" : "movie";
     var base = "https://api.themoviedb.org/3/" + path + "/" + cleanId;
     var ptRes = yield fetchJson(base + "?api_key=" + TMDB_API_KEY + "&language=pt-BR");
     if (!ptRes.data) return null;
     d = ptRes.data;
-
     var origin = d.origin_country || [];
     var isJapaneseOrigin = d.original_language === "ja" || origin.indexOf("JP") !== -1 || origin.indexOf("JA") !== -1;
-
     var altTitles = [];
     var altRes = yield fetchJson(base + "/alternative_titles?api_key=" + TMDB_API_KEY);
     if (altRes && altRes.data) {
@@ -169,7 +138,6 @@ function getTmdbInfo(tmdbId, type) {
         }
       }
     }
-
     return {
       title: d.title || d.name || "",
       originalTitle: d.original_title || d.original_name || "",
@@ -188,26 +156,29 @@ function searchAnime(query) {
     if (!query) return [];
     var url = BASE_URL + "/?s=" + encodeURIComponent(query);
     var res = yield fetchText(url);
-    
-    if (res.status === 403 || res.status === 503) {
-      // Cloudflare block
-      return [{ cloudflare: true }];
-    }
-
+    if (res.status === 403 || res.status === 503) return [{ cloudflare: true }];
     if (res.status !== 200 || !res.text) return [];
 
     var results = [];
     var seen = {};
-    var animeRe = /href=["']((?:https?:\/\/[^\/]+)?\/(?:anime|animes)\/([^"']+))["']/gi;
+    var aTagRe = /<a\s+([^>]+)>/gi;
     var m;
+    while ((m = aTagRe.exec(res.text)) !== null) {
+      var attrs = m[1];
+      var hrefMatch = attrs.match(/href=["'](?:https?:\/\/[^\/]+)?\/video\/(\d+)\/?["']/i);
+      if (hrefMatch) {
+        var id = hrefMatch[1];
+        if (seen[id]) continue;
+        
+        var titleMatch = attrs.match(/title=["']([^"']+)["']/i);
+        var title = titleMatch ? titleMatch[1] : "";
+        
+        // Limpar o titulo
+        title = title.replace(/\s*[–\-]\s*Todos os Epis.+$/i, '').trim();
 
-    while ((m = animeRe.exec(res.text)) !== null) {
-      var fullUrl = m[1];
-      if (fullUrl.indexOf("http") !== 0) fullUrl = BASE_URL + fullUrl;
-      var slug = m[2].replace(/\/$/, ""); // Remove trailing slash
-      if (seen[slug]) continue;
-      seen[slug] = 1;
-      results.push({ url: fullUrl, slug: slug });
+        seen[id] = 1;
+        results.push({ url: BASE_URL + "/video/" + id + "/", id: id, name: title });
+      }
     }
     return results;
   });
@@ -215,23 +186,30 @@ function searchAnime(query) {
 
 function parseEpisodes(html, targetEp) {
     var epLink = null;
-    var epRe = /href=["']((?:https?:\/\/[^\/]+)?\/(?:video|episodio|episodios)\/[^"']+)["']/gi;
     var epLinksEncontrados = [];
+    var aTagRe = /<a\s+([^>]+)>/gi;
     var m;
 
-    while ((m = epRe.exec(html)) !== null) {
-        var linkE = m[1];
-        if (linkE.indexOf("http") !== 0) linkE = BASE_URL + linkE;
-        if (epLinksEncontrados.indexOf(linkE) === -1) {
-            epLinksEncontrados.push(linkE);
+    while ((m = aTagRe.exec(html)) !== null) {
+        var attrs = m[1];
+        var hrefMatch = attrs.match(/href=["'](?:https?:\/\/[^\/]+)?\/(\d{3,}b)\/?["']/i);
+        if (hrefMatch) {
+            var epId = hrefMatch[1];
+            var linkE = BASE_URL + "/" + epId + "/";
+            var titleMatch = attrs.match(/title=["']([^"']+)["']/i);
+            var epTitle = titleMatch ? titleMatch[1] : "";
+            epLinksEncontrados.push({ url: linkE, title: epTitle });
         }
     }
 
+    if (epLinksEncontrados.length === 0) return null;
+
     for (var i = 0; i < epLinksEncontrados.length; i++) {
-        var lnk = epLinksEncontrados[i];
-        var epMatch = lnk.match(/-(?:episodio|ep)-?0*(\d+)\/?$/i) || lnk.match(/-0*(\d+)\/?$/i);
-        if (epMatch && parseInt(epMatch[1], 10) === parseInt(targetEp, 10)) {
-            epLink = lnk;
+        var item = epLinksEncontrados[i];
+        var epMatch = item.title.match(/Epis[oó]dio\s*(\d+)/i) || item.title.match(/Ep\.?\s*(\d+)/i) || item.title.match(/\bE?(\d+)\b/i);
+        var epNum = epMatch ? parseInt(epMatch[1], 10) : (i + 1);
+        if (epNum === parseInt(targetEp, 10)) {
+            epLink = item.url;
             break;
         }
     }
@@ -240,34 +218,18 @@ function parseEpisodes(html, targetEp) {
 
 function extractStream(html) {
     var finalUrl = null;
-    var isIframe = false;
-
-    // 1. Procura vídeo direto (M3U8 / MP4)
-    var mp4Match = html.match(/(https?:\/\/[^\s"'<>]+(?:\.m3u8|\.mp4)[^\s"'<>]*)/i);
-    if (mp4Match) {
-        finalUrl = mp4Match[1];
-    } else {
-        // 2. Procura Iframes (Omitindo iframes de redes sociais e ads)
-        var iframeRe = /<iframe[^>]+src=["']([^"']+)["']/gi;
-        var match;
-        while ((match = iframeRe.exec(html)) !== null) {
-            var src = match[1];
-            if (src.indexOf("facebook") === -1 && src.indexOf("disqus") === -1 && src.indexOf("ads") === -1) {
-                finalUrl = src;
-                if (finalUrl.indexOf("http") !== 0) finalUrl = "https:" + finalUrl;
-                isIframe = true;
-                break;
-            }
+    var iframeRe = /<iframe[^>]+src=["']([^"']+)["']/gi;
+    var match;
+    while ((match = iframeRe.exec(html)) !== null) {
+        var src = match[1];
+        if (src.indexOf("facebook") === -1 && src.indexOf("disqus") === -1 && src.indexOf("ads") === -1) {
+            finalUrl = src;
+            if (finalUrl.indexOf("http") !== 0) finalUrl = "https:" + finalUrl;
+            break;
         }
     }
-
     if (!finalUrl) return null;
-
-    var typeStr = "mp4";
-    if (finalUrl.indexOf(".m3u8") !== -1) typeStr = "hls";
-    else if (isIframe) typeStr = "web";
-
-    return { url: finalUrl, type: typeStr, isIframe: isIframe };
+    return { url: finalUrl, type: "web", isIframe: true };
 }
 
 // ─────────────────────────────────────────────
@@ -296,17 +258,29 @@ function getStreams(tmdbId, type, season, episode) {
 
       for (var q = 0; q < queries.length && candidatePages.length < 4; q++) {
           var searchResults = yield searchAnime(queries[q]);
-          
           if (searchResults.length > 0 && searchResults[0].cloudflare) {
              hasCloudflare = true;
              break;
           }
-
           for (var sr = 0; sr < searchResults.length; sr++) {
-              if (seenPage[searchResults[sr].slug]) continue;
-              if (!isStrictMatch(searchResults[sr].slug, expectedRoots)) continue;
+              if (seenPage[searchResults[sr].id]) continue;
               
-              seenPage[searchResults[sr].slug] = 1;
+              var itemSlug = slugify(searchResults[sr].name);
+              var matched = false;
+              if (itemSlug) {
+                  if (isStrictMatch(itemSlug, expectedRoots)) {
+                      matched = true;
+                  } else {
+                      for(var er=0; er<expectedRoots.length; er++) {
+                          if (expectedRoots[er] && itemSlug.indexOf(expectedRoots[er]) !== -1) {
+                              matched = true; break;
+                          }
+                      }
+                  }
+              }
+              if (!matched) continue;
+              
+              seenPage[searchResults[sr].id] = 1;
               candidatePages.push(searchResults[sr]);
               if (candidatePages.length >= 4) break;
           }
@@ -328,10 +302,7 @@ function getStreams(tmdbId, type, season, episode) {
           if (pageRes.status !== 200) continue;
 
           var epLink = parseEpisodes(pageRes.text, targetEp);
-          
-          if (!epLink) {
-              epLink = page.url.replace("/anime/", "/video/") + "-episodio-" + targetEp;
-          }
+          if (!epLink) continue; 
 
           var epRes = yield fetchText(epLink);
           if (epRes.status !== 200) continue;
@@ -343,15 +314,15 @@ function getStreams(tmdbId, type, season, episode) {
           seenStreamUrl[sx.url] = 1;
 
           var displayTitle = info.title || "Anime";
-          var isDubbed = /dublado/i.test(page.slug);
+          var isDubbed = /dublado/i.test(page.name);
           var flag = isDubbed ? "DUB" : "LEG";
 
           streams.push({
               url: sx.url,
-              quality: sx.type === "hls" ? "Auto" : "720p",
+              quality: "Auto",
               title: "🇧🇷 [" + PROVIDER_TAG + "] " + displayTitle + " · EP " + targetEp + " [" + flag + "]",
               type: sx.type,
-              behaviorHints: { notWebReady: !sx.isIframe, bingeGroup: "anitube-" + page.slug }
+              behaviorHints: { notWebReady: !sx.isIframe, bingeGroup: "anitube-" + page.id }
           });
       }
 
