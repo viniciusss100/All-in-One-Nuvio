@@ -6,7 +6,7 @@
 var TMDB_API_KEY = "68e094699525b18a70bab2f86b1fa706";
 var BASE_URL = "https://www.anitube.zip";
 var PROVIDER_TAG = "Anitube";
-var PROVIDER_VERSION = "3.0.0";
+var PROVIDER_VERSION = "3.1.0";
 var USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/137.0.0.0 Safari/537.36";
 
 var __async = function (__this, __arguments, generator) {
@@ -106,7 +106,7 @@ function isStrictMatch(slug, expectedRoots) {
 // ─────────────────────────────────────────────
 function getTmdbInfo(tmdbId, type) {
   return __async(this, null, function* () {
-    var cleanId = String(tmdbId).replace(/[^a-zA-Z0-9]/g, ""); 
+    var cleanId = String(tmdbId).replace(/[^a-zA-Z0-9]/g, "").replace(/^tmdb/i, ""); 
     var isImdb = cleanId.indexOf("tt") === 0;
     var d = null;
     if (isImdb) {
@@ -165,19 +165,23 @@ function searchAnime(query) {
     var m;
     while ((m = aTagRe.exec(res.text)) !== null) {
       var attrs = m[1];
-      var hrefMatch = attrs.match(/href=["'](?:https?:\/\/[^\/]+)?\/video\/(\d+)\/?["']/i);
+      var hrefMatch = attrs.match(/href=["']((?:https?:\/\/[^\/]+)?\/video\/\d+\/?)["']/i);
       if (hrefMatch) {
-        var id = hrefMatch[1];
+        var link = hrefMatch[1];
+        if (link.indexOf("http") !== 0) link = BASE_URL + link;
+        
+        var idMatch = link.match(/\/video\/(\d+)/i);
+        if (!idMatch) continue;
+        var id = idMatch[1];
+        
         if (seen[id]) continue;
+        seen[id] = 1;
         
         var titleMatch = attrs.match(/title=["']([^"']+)["']/i);
         var title = titleMatch ? titleMatch[1] : "";
-        
-        // Limpar o titulo
         title = title.replace(/\s*[–\-]\s*Todos os Epis.+$/i, '').trim();
 
-        seen[id] = 1;
-        results.push({ url: BASE_URL + "/video/" + id + "/", id: id, name: title });
+        results.push({ url: link, id: id, name: title });
       }
     }
     return results;
@@ -192,13 +196,15 @@ function parseEpisodes(html, targetEp) {
 
     while ((m = aTagRe.exec(html)) !== null) {
         var attrs = m[1];
-        var hrefMatch = attrs.match(/href=["'](?:https?:\/\/[^\/]+)?\/(\d{3,}b)\/?["']/i);
+        var hrefMatch = attrs.match(/href=["']((?:https?:\/\/[^\/]+)?\/(?:video\/\d+|\d{3,}b)\/?)["']/i);
         if (hrefMatch) {
-            var epId = hrefMatch[1];
-            var linkE = BASE_URL + "/" + epId + "/";
+            var linkE = hrefMatch[1];
+            if (linkE.indexOf("http") !== 0) linkE = BASE_URL + linkE;
             var titleMatch = attrs.match(/title=["']([^"']+)["']/i);
             var epTitle = titleMatch ? titleMatch[1] : "";
-            epLinksEncontrados.push({ url: linkE, title: epTitle });
+            if (epTitle.match(/Epis[oó]dio/i) || epTitle.match(/Ep\.?/i) || epTitle.match(/\d+/)) {
+               epLinksEncontrados.push({ url: linkE, title: epTitle });
+            }
         }
     }
 
