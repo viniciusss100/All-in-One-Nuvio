@@ -130,10 +130,10 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
         
         if (directUrl && (directUrl.includes('.mp4') || directUrl.includes('.m3u8') || directUrl.startsWith('http'))) {
           let resolution = directUrl.includes('FHD') ? '1080p' : (directUrl.includes('HD') ? '720p' : 'Auto');
-          let lang = (r.slug && r.slug.includes('legendado')) ? 'Legendado' : (r.slug && r.slug.includes('dublado') ? 'Dublado' : 'PT-BR');
+          let lang = (r.slug && r.slug.includes('legendado')) ? 'Leg' : (r.slug && r.slug.includes('dublado') ? 'Dub' : 'PT-BR');
           streams.push({
-            name: 'BrazucaPlay',
-            title: 'Servidor ' + r.id + ' (Geek)\nRes: ' + resolution + ' | Idioma: ' + lang,
+            name: 'BrazucaPlay (' + lang + ')',
+            title: 'Servidor Geek | ' + resolution,
             url: directUrl,
             quality: resolution,
             size: 'Unknown',
@@ -144,45 +144,6 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
       }
     }
 
-    // Opção 2: Provedor Alternativo de Fallback (WarezCDN / Embed.su)
-    // Integrado para garantir que sempre haja um retorno válido, especialmente para Séries
-    if (streams.length === 0) {
-      // Como o WarezCDN está passando por instabilidades de domínio (warezcdn.com -> pulseadnetwork),
-      // enviamos a rota do embed.su como fallback principal, e o warezcdn.net secundário
-      let embedSu = '';
-      let warezCdn = '';
-      
-      if (mediaType === 'movie') {
-         embedSu = `https://embed.su/embed/movie/${tmdbId}`;
-         warezCdn = `https://embed.warezcdn.net/filme/${tmdbId}`;
-      } else {
-         embedSu = `https://embed.su/embed/tv/${tmdbId}/${seasonNum}/${episodeNum}`;
-         warezCdn = `https://embed.warezcdn.net/serie/${tmdbId}/${seasonNum}/${episodeNum}`;
-      }
-
-      // Adicionamos o Embed.su (Multi-legendas incluindo PT-BR)
-      streams.push({
-         name: 'BrazucaPlay',
-         title: 'Servidor Global\nRes: Auto | Idioma: Multi-Subs',
-         url: embedSu,
-         externalUrl: embedSu,
-         quality: 'Auto',
-         size: 'Unknown',
-         provider: 'brazucaplay'
-      });
-
-      // Adicionamos o WarezCDN (PT-BR) para quando o domínio voltar a estabilizar
-      streams.push({
-         name: 'BrazucaPlay',
-         title: 'Servidor Warez\nRes: Auto | Idioma: PT-BR',
-         url: warezCdn,
-         externalUrl: warezCdn,
-         quality: 'Auto',
-         size: 'Unknown',
-         provider: 'brazucaplay'
-      });
-    }
-    
     return streams;
   } catch (e) {
     console.error('BrazucaPlay Error: ', e);
