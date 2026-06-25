@@ -117,33 +117,66 @@ function extractResolverSlugs(xmlContent, tmdbId) {
 async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
   try {
     const streams = [];
-    if (mediaType === 'movie') {
-      const xml = await getMovieDb();
-      const resolvers = extractResolverSlugs(xml, tmdbId);
-      
-      if (resolvers && resolvers.length > 0) {
-        for (let r of resolvers) {
-          // Ex: { 'resolver': 3, 'request': 'mvshows=cara-de-um-focinho-de-outro' }
-          const params = { resolver: r.id, request: `mvshows=${r.slug}` };
-          const directUrl = await getGeekAntenadoData(params).catch(() => null);
-          
-          if (directUrl && (directUrl.includes('.mp4') || directUrl.includes('.m3u8') || directUrl.startsWith('http'))) {
-            streams.push({
-              name: 'BrazucaPlay',
-              title: 'Servidor ' + r.id + ' (Direto)',
-              url: directUrl,
-              quality: directUrl.includes('FHD') ? '1080p' : (directUrl.includes('HD') ? '720p' : 'Auto'),
-              size: 'Unknown',
-              headers: HEADERS,
-              provider: 'brazucaplay'
-            });
-          }
+    
+    // Opção 1: GeekAntenado (sem trava de filmes, suportando extração de resolver_tvshows/episodes)
+    const xml = await getMovieDb();
+    const resolvers = extractResolverSlugs(xml, tmdbId);
+    
+    if (resolvers && resolvers.length > 0) {
+      for (let r of resolvers) {
+        // Ex: mvshows=... ou tvshows=...
+        const params = { resolver: r.id, request: `${r.type}=${r.slug}` };
+        const directUrl = await getGeekAntenadoData(params).catch(() => null);
+        
+        if (directUrl && (directUrl.includes('.mp4') || directUrl.includes('.m3u8') || directUrl.startsWith('http'))) {
+          streams.push({
+            name: 'BrazucaPlay',
+            title: 'Servidor ' + r.id + ' (Geek)',
+            url: directUrl,
+            quality: directUrl.includes('FHD') ? '1080p' : (directUrl.includes('HD') ? '720p' : 'Auto'),
+            size: 'Unknown',
+            headers: HEADERS,
+            provider: 'brazucaplay'
+          });
         }
       }
-    } else {
-        // Implementação de séries requereria parsing do SeriesBase e duas chamadas de API.
-        // Foco inicial em filmes para sanar o Player Error
-        return [];
+    }
+
+    // Opção 2: Provedor Alternativo de Fallback (WarezCDN / Embed.su)
+    // Integrado para garantir que sempre haja um retorno válido, especialmente para Séries
+    if (streams.length === 0) {
+      // Como o WarezCDN está passando por instabilidades de domínio (warezcdn.com -> pulseadnetwork),
+      // enviamos a rota do embed.su como fallback principal, e o warezcdn.net secundário
+      let embedSu = '';
+      let warezCdn = '';
+      
+      if (mediaType === 'movie') {
+         embedSu = `https://embed.su/embed/movie/${tmdbId}`;
+         warezCdn = `https://embed.warezcdn.net/filme/${tmdbId}`;
+      } else {
+         embedSu = `https://embed.su/embed/tv/${tmdbId}/${seasonNum}/${episodeNum}`;
+         warezCdn = `https://embed.warezcdn.net/serie/${tmdbId}/${seasonNum}/${episodeNum}`;
+      }
+
+      // Adicionamos o Embed.su (Multi-legendas incluindo PT-BR)
+      streams.push({
+         name: 'BrazucaPlay',
+         title: 'Servidor Global (Multi-Subs)',
+         url: embedSu,
+         quality: 'Auto',
+         size: 'Unknown',
+         provider: 'brazucaplay'
+      });
+
+      // Adicionamos o WarezCDN (PT-BR) para quando o domínio voltar a estabilizar
+      streams.push({
+         name: 'BrazucaPlay',
+         title: 'Servidor Warez (PT-BR)',
+         url: warezCdn,
+         quality: 'Auto',
+         size: 'Unknown',
+         provider: 'brazucaplay'
+      });
     }
     
     return streams;
