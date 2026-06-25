@@ -546,8 +546,8 @@ function toStream(sx, info, animeSlug, season, episode, relevance, isDubbed) {
 
   return {
     _relevance: relevance || 0,
-    name: "[+] AnimesDigital",
-    title: titleBase + epTag + arcSuffix + "\nRes: " + (sx.quality || "Auto") + " | Idioma: " + (isDubbed ? "Dublado" : "Legendado"),
+    name: 'AnimesDigital (' + (isDubbed ? "DUB" : "LEG") + ')',
+    title: titleBase + epTag + arcSuffix,
     quality: sx.quality || "Auto",
     url: sx.url,
     type: sx.type,
