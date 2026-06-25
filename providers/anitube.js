@@ -1,13 +1,13 @@
 /**
- * Anitube - Nuvio Provider (Fixed Build based on Anitube.zip / Stremio Addon logic)
+ * Anitube - Nuvio Provider
  */
 "use strict";
 
 var TMDB_API_KEY = "68e094699525b18a70bab2f86b1fa706";
 var BASE_URL = "https://www.anitube.zip";
 var PROVIDER_TAG = "Anitube";
-var PROVIDER_VERSION = "3.2.1";
-var USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/137.0.0.0 Safari/537.36";
+var PROVIDER_VERSION = "3.3.0";
+var USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36";
 
 var __async = function (__this, __arguments, generator) {
   return new Promise(function (resolve, reject) {
@@ -18,35 +18,21 @@ var __async = function (__this, __arguments, generator) {
   });
 };
 
-function fetchWithTimeout(url, opts, ms) {
-  return new Promise(function(resolve, reject) {
-    var timeoutId = setTimeout(function() {
-      reject(new Error("Timeout"));
-    }, ms);
-    fetch(url, opts).then(function(res) {
-      clearTimeout(timeoutId);
-      resolve(res);
-    }).catch(function(err) {
-      clearTimeout(timeoutId);
-      reject(err);
-    });
-  });
-}
-
 function fetchText(url, opts) {
   if (!opts) opts = {};
   return __async(this, null, function* () {
     try {
-      var fetchOpts = {
+      var r = yield fetch(url, {
         method: opts.method || "GET",
         redirect: "follow",
-        headers: Object.assign({ "User-Agent": USER_AGENT }, opts.headers || {})
-      };
-      var r = yield fetchWithTimeout(url, fetchOpts, 12000);
+        headers: Object.assign({
+          "User-Agent": USER_AGENT,
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+          "Accept-Language": "pt-BR,pt;q=0.9"
+        }, opts.headers || {})
+      });
       return { status: r.status, text: yield r.text() };
-    } catch (e) { 
-      return { status: -1, text: "" }; 
-    }
+    } catch (e) { return { status: -1, text: "" }; }
   });
 }
 
@@ -54,22 +40,22 @@ function fetchJson(url, opts) {
   if (!opts) opts = {};
   return __async(this, null, function* () {
     try {
-      var fetchOpts = {
+      var r = yield fetch(url, {
         method: opts.method || "GET",
         redirect: "follow",
-        headers: Object.assign({ "User-Agent": USER_AGENT, Accept: "application/json" }, opts.headers || {})
-      };
-      var r = yield fetchWithTimeout(url, fetchOpts, 12000);
-      return { status: r.status, data: yield r.json() };
-    } catch (e) { 
-      return { status: -1, data: null }; 
-    }
+        headers: Object.assign({
+          "User-Agent": USER_AGENT,
+          Accept: "application/json, */*",
+          "Accept-Language": "pt-BR,pt;q=0.9"
+        }, opts.headers || {})
+      });
+      var t = yield r.text();
+      try { return { status: r.status, data: JSON.parse(t) }; }
+      catch (e) { return { status: r.status, data: null, raw: t }; }
+    } catch (e) { return { status: -1, data: null }; }
   });
 }
 
-// ─────────────────────────────────────────────
-// Slug utilities
-// ─────────────────────────────────────────────
 function normalize(str) {
   if (!str) return "";
   str = str.toLowerCase();
@@ -122,9 +108,6 @@ function isStrictMatch(slug, expectedRoots) {
   return false;
 }
 
-// ─────────────────────────────────────────────
-// TMDB
-// ─────────────────────────────────────────────
 function getTmdbInfo(tmdbId, type) {
   return __async(this, null, function* () {
     var cleanId = String(tmdbId).replace(/[^a-zA-Z0-9]/g, "").replace(/^tmdb/i, ""); 
@@ -134,12 +117,12 @@ function getTmdbInfo(tmdbId, type) {
        var findUrl = "https://api.themoviedb.org/3/find/" + cleanId + "?api_key=" + TMDB_API_KEY + "&external_source=imdb_id&language=pt-BR";
        var fRes = yield fetchJson(findUrl);
        if (!fRes.data) return null;
-       var results = type === "tv" ? fRes.data.tv_results : fRes.data.movie_results;
+       var results = (type === "tv" || type === "anime") ? fRes.data.tv_results : fRes.data.movie_results;
        if (results && results.length > 0) d = results[0];
        if (!d) return null;
        cleanId = d.id;
     }
-    var path = type === "tv" ? "tv" : "movie";
+    var path = (type === "tv" || type === "anime") ? "tv" : "movie";
     var base = "https://api.themoviedb.org/3/" + path + "/" + cleanId;
     var ptRes = yield fetchJson(base + "?api_key=" + TMDB_API_KEY + "&language=pt-BR");
     if (!ptRes.data) return null;
@@ -169,9 +152,6 @@ function getTmdbInfo(tmdbId, type) {
   });
 }
 
-// ─────────────────────────────────────────────
-// Search & Extract
-// ─────────────────────────────────────────────
 function searchAnime(query) {
   return __async(this, null, function* () {
     if (!query) return [];
@@ -297,15 +277,14 @@ function extractStream(html) {
     return { url: finalUrl, type: typeStr, isIframe: isIframe };
 }
 
-// ─────────────────────────────────────────────
-// Main
-// ─────────────────────────────────────────────
 function getStreams(tmdbId, type, season, episode) {
   return __async(this, null, function* () {
     try {
-      if (type !== "tv") return [];
+      if (!tmdbId) return [];
       var info = yield getTmdbInfo(tmdbId, type);
       if (!info || (!info.title && !info.originalTitle)) return [];
+      
+      console.log("[" + PROVIDER_TAG + " v" + PROVIDER_VERSION + "] " + type + " " + (info.title || info.originalTitle));
 
       var targetEp = episode || 1;
       
@@ -356,6 +335,7 @@ function getStreams(tmdbId, type, season, episode) {
       }
 
       if (candidatePages.length === 0) return [];
+      console.log("[" + PROVIDER_TAG + "] " + candidatePages.length + " candidate pages");
 
       var streams = [];
       var seenStreamUrl = {};
@@ -390,10 +370,12 @@ function getStreams(tmdbId, type, season, episode) {
               behaviorHints: { notWebReady: !sx.isIframe, bingeGroup: "anitube-" + page.id }
           });
       }
-
+      
+      console.log("[" + PROVIDER_TAG + "] total streams: " + streams.length);
       return streams;
 
     } catch (error) {
+      console.log("[" + PROVIDER_TAG + "] error: " + error);
       return [];
     }
   });
