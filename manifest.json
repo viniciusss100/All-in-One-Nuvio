@@ -14,6 +14,34 @@
       "formats": ["mp4", "m3u8", "mkv"],
       "logo": "https://i.postimg.cc/L64M3bYV/netmirror.png",
       "contentLanguage": ["pt", "pt-br"]
+    },
+    {
+      "id": "hianime",
+      "name": "HiAnime",
+      "description": "HiAnime multi-server anime streaming with real-time mapping and subtitles",
+      "version": "1.0.0",
+      "author": "Nuvio Team",
+      "supportedTypes": ["movie", "tv"],
+      "filename": "providers/hianime.js",
+      "enabled": true,
+      "hasSettings": true,
+      "formats": ["m3u8"],
+      "logo": "https://i.postimg.cc/13SYJPTx/hianime.png",
+      "contentLanguage": ["ja", "en"]
+    },
+    {
+      "id": "torrentio",
+      "name": "🧲 Torrentio",
+      "description": "Movies and shows streaming",
+      "version": "1.0.0",
+      "author": "Phisher",
+      "supportedTypes": ["movie", "tv"],
+      "filename": "providers/torrentio.js",
+      "enabled": true,
+      "hasSettings": true,
+      "formats": ["mp4", "m3u8"],
+      "logo": "https://i.postimg.cc/ZRYTCy0T/torrentio.png",
+      "contentLanguage": ["en", "hi"]
     }
   ]
 }
