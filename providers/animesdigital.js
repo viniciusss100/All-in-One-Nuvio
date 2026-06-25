@@ -355,7 +355,8 @@ function searchAnime(query) {
 
     var results = [];
     var seen = {};
-    var re = /href=["'](https?:\/\/animesdigital\.org\/(?:anime|desenho|dorama|tokusatsu)\/[a-z]+\/([a-z0-9-]+))\/?["']/gi;
+    var re = /href=["'](?:https?:\/\/[^\/]+)?\/(?:anime|desenho|dorama|tokusatsu)\/[a-z]+\/([a-z0-9-]+)\/?["']/gi;
+    var reFilm = /href=["'](?:https?:\/\/[^\/]+)?\/filme\/[a-z]+\/([a-z0-9-]+)\/?["']/gi;
     var m;
     while ((m = re.exec(res.text)) !== null) {
       var full = m[1];
@@ -453,7 +454,7 @@ function guessPageForEpisode(maxEpOnPage1, targetEp) {
 function parseEpisodes(html) {
   var eps = [];
   var seen = {};
-  var blockRe = /<a[^>]+href=["']https?:\/\/animesdigital\.org\/video\/[a-z]+\/([0-9]+)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi;
+  var blockRe = /<a[^>]+href=["'](?:https?:\/\/[^\/]+)?\/video\/[a-z]+\/([0-9]+)[^"']*["'][^>]*>([\s\S]*?)<\/a>/gi;
   var m;
   while ((m = blockRe.exec(html)) !== null) {
     var id = m[1];
