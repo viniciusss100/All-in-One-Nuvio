@@ -6,7 +6,7 @@
 var TMDB_API_KEY = "68e094699525b18a70bab2f86b1fa706";
 var BASE_URL = "https://www.anitube.zip";
 var PROVIDER_TAG = "Anitube";
-var PROVIDER_VERSION = "3.2.0";
+var PROVIDER_VERSION = "3.2.1";
 var USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/137.0.0.0 Safari/537.36";
 
 var __async = function (__this, __arguments, generator) {
@@ -18,21 +18,35 @@ var __async = function (__this, __arguments, generator) {
   });
 };
 
+function fetchWithTimeout(url, opts, ms) {
+  return new Promise(function(resolve, reject) {
+    var timeoutId = setTimeout(function() {
+      reject(new Error("Timeout"));
+    }, ms);
+    fetch(url, opts).then(function(res) {
+      clearTimeout(timeoutId);
+      resolve(res);
+    }).catch(function(err) {
+      clearTimeout(timeoutId);
+      reject(err);
+    });
+  });
+}
+
 function fetchText(url, opts) {
   if (!opts) opts = {};
   return __async(this, null, function* () {
     try {
-      var ctrl = new AbortController();
-      var id = setTimeout(function() { ctrl.abort(); }, 12000);
-      var r = yield fetch(url, {
+      var fetchOpts = {
         method: opts.method || "GET",
         redirect: "follow",
-        headers: Object.assign({ "User-Agent": USER_AGENT }, opts.headers || {}),
-        signal: ctrl.signal
-      });
-      clearTimeout(id);
+        headers: Object.assign({ "User-Agent": USER_AGENT }, opts.headers || {})
+      };
+      var r = yield fetchWithTimeout(url, fetchOpts, 12000);
       return { status: r.status, text: yield r.text() };
-    } catch (e) { return { status: -1, text: "" }; }
+    } catch (e) { 
+      return { status: -1, text: "" }; 
+    }
   });
 }
 
@@ -40,17 +54,16 @@ function fetchJson(url, opts) {
   if (!opts) opts = {};
   return __async(this, null, function* () {
     try {
-      var ctrl = new AbortController();
-      var id = setTimeout(function() { ctrl.abort(); }, 12000);
-      var r = yield fetch(url, {
+      var fetchOpts = {
         method: opts.method || "GET",
         redirect: "follow",
-        headers: Object.assign({ "User-Agent": USER_AGENT, Accept: "application/json" }, opts.headers || {}),
-        signal: ctrl.signal
-      });
-      clearTimeout(id);
+        headers: Object.assign({ "User-Agent": USER_AGENT, Accept: "application/json" }, opts.headers || {})
+      };
+      var r = yield fetchWithTimeout(url, fetchOpts, 12000);
       return { status: r.status, data: yield r.json() };
-    } catch (e) { return { status: -1, data: null }; }
+    } catch (e) { 
+      return { status: -1, data: null }; 
+    }
   });
 }
 
@@ -200,7 +213,6 @@ function parseEpisodes(html, targetEp) {
     var epLink = null;
     var epLinksEncontrados = [];
     
-    // Filtra pela lista de episódios para não pegar links aleatórios do sidebar
     var containerMatch = html.match(/class=["'][^"']*pagAniListaContainer[^"']*["'][^>]*>([\s\S]*?)<\/div>/i);
     var targetHtml = containerMatch ? containerMatch[1] : html;
 
@@ -254,7 +266,6 @@ function extractStream(html) {
         var src = iframes[i];
         if (src.indexOf("facebook") !== -1 || src.indexOf("disqus") !== -1 || src.indexOf("ads") !== -1) continue;
 
-        // Se for um iframe que aponta para um serviço que possamos decodificar a .m3u8:
         var dMatch = src.match(/[?&]d=([^&]+)/);
         if (dMatch) {
             var inner = dMatch[1];
