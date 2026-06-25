@@ -164,7 +164,7 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
       streams.push({
          name: 'BrazucaPlay',
          title: 'Servidor Global\nRes: Auto | Idioma: Multi-Subs',
-         url: embedSu,
+         externalUrl: embedSu,
          quality: 'Auto',
          size: 'Unknown',
          provider: 'brazucaplay'
@@ -174,7 +174,7 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
       streams.push({
          name: 'BrazucaPlay',
          title: 'Servidor Warez\nRes: Auto | Idioma: PT-BR',
-         url: warezCdn,
+         externalUrl: warezCdn,
          quality: 'Auto',
          size: 'Unknown',
          provider: 'brazucaplay'
