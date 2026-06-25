@@ -124,8 +124,8 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
     
     if (resolvers && resolvers.length > 0) {
       for (let r of resolvers) {
-        // Ex: mvshows=... ou tvshows=...
-        const params = { resolver: r.id, request: `${r.type}=${r.slug}` };
+        let reqType = r.type === 'mv' ? 'mvshows' : r.type;
+        const params = { resolver: r.id, request: `${reqType}=${r.slug}` };
         const directUrl = await getGeekAntenadoData(params).catch(() => null);
         
         if (directUrl && (directUrl.includes('.mp4') || directUrl.includes('.m3u8') || directUrl.startsWith('http'))) {
