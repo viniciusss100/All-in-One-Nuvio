@@ -1,5 +1,5 @@
 // Nuvio Provider - PT-BR Prioritário
-// Código limpo (sem ofuscação) e 100% compatível com a engine do Nuvio.
+// Corrigido: Bypass inteligente de TMDB e sanitização estrita para o Player.
 
 const TMDB_API_KEY = '68e094699525b18a70bab2f86b1fa706';
 const TORRENTIO_API = 'https://torrentio.strem.io';
@@ -19,147 +19,118 @@ const TRACKERS = [
   "udp://tracker.dler.org:6969/announce"
 ];
 
-// Monta os Trackers no formato para URL
+// Monta os Trackers no formato exigido pelo magnet
 const trackersString = TRACKERS.map(tr => `tr=${encodeURIComponent(tr)}`).join('&');
 
-// Detecta se é dublado/português baseado nas keywords comuns de torrents
 function detectLanguage(title = '') {
-  if (!title) return 'indefinido';
-  const lowerTitle = title.toLowerCase();
-  
-  const portugueseKeywords = ['1-sf', '0-sf', 'dual-', 'brazilian', 'portuguese', 'português', 'pt-br', 'pt-pt', 'pob', 'por', 'dublado', 'nacional'];
-  for (const keyword of portugueseKeywords) {
-    if (lowerTitle.includes(keyword)) return 'português';
+  const lower = title.toLowerCase();
+  const ptKeys = ['1-sf', '0-sf', 'dual-', 'brazilian', 'portuguese', 'português', 'pt-br', 'pt-pt', 'pob', 'por', 'dublado'];
+  for (const key of ptKeys) {
+    if (lower.includes(key)) return 'português';
   }
-  
-  if (lowerTitle.includes('english') || lowerTitle.includes('eng')) return 'english';
-  if (lowerTitle.includes('spanish') || lowerTitle.includes('español')) return 'spanish';
-  
+  if (lower.includes('english') || lower.includes('eng')) return 'english';
+  if (lower.includes('spanish') || lower.includes('español')) return 'spanish';
   return 'indefinido';
 }
 
 function extractQuality(title = '') {
-  const lowerTitle = title.toLowerCase();
-  if (lowerTitle.includes('2160p') || lowerTitle.includes('4k')) return '4K';
-  if (lowerTitle.includes('1080p')) return '1080p';
-  if (lowerTitle.includes('720p')) return '720p';
-  if (lowerTitle.includes('480p')) return '480p';
+  const lower = title.toLowerCase();
+  if (lower.includes('2160p') || lower.includes('4k')) return '4K';
+  if (lower.includes('1080p')) return '1080p';
+  if (lower.includes('720p')) return '720p';
+  if (lower.includes('480p')) return '480p';
   return '720p';
 }
 
-function buildMagnet(infoHash) {
-  if (!infoHash) return '';
-  return `magnet:?xt=urn:btih:${infoHash}&${trackersString}`;
-}
-
-// O código ofuscado original extraía o ID usando fetch nativo na API do TMDB
-async function getImdbId(tmdbId, type) {
+async function getStreams(id, type, season, episode) {
   try {
-    const url = `https://api.themoviedb.org/3/${type}/${tmdbId}/external_ids?api_key=${TMDB_API_KEY}&language=pt-BR`;
-    const response = await fetch(url, { skipSizeCheck: true });
+    let imdbId = id;
     
-    if (!response.ok) return null;
+    // CORREÇÃO 1: Se o ID recebido NÃO começar com 'tt', usamos o TMDB para converter.
+    // Se já for 'tt...', pula essa etapa e vai direto baixar o torrent, economizando tempo.
+    if (id && !String(id).startsWith('tt')) {
+      const tmdbUrl = `https://api.themoviedb.org/3/${type}/${id}/external_ids?api_key=${TMDB_API_KEY}&language=pt-BR`;
+      const tmdbRes = await fetch(tmdbUrl, { skipSizeCheck: true });
+      if (tmdbRes.ok) {
+        const tmdbData = await tmdbRes.json();
+        imdbId = tmdbData?.external_ids?.imdb_id || tmdbData?.imdb_id || id;
+      }
+    }
     
-    const data = await response.json();
-    return data?.external_ids?.imdb_id || data?.imdb_id || null;
-  } catch (error) {
-    console.log('[TMDB] Erro ao buscar ID:', error);
-    return null;
-  }
-}
+    // Se, mesmo após a checagem, não tivermos um ID válido pro Torrentio, aborta
+    if (!imdbId || !String(imdbId).startsWith('tt')) {
+      return [];
+    }
 
-async function invokeTorrentio(imdbId, season = null, episode = null) {
-  try {
-    const isTv = season != null && episode != null;
+    const isTv = (type === 'tv' && season != null && episode != null);
     const url = isTv
       ? `${TORRENTIO_API}/stream/series/${imdbId}:${season}:${episode}.json`
       : `${TORRENTIO_API}/stream/movie/${imdbId}.json`;
       
-    console.log('[TORRENTIO] Requesting:', url);
-
     const response = await fetch(url, { headers: HEADERS, skipSizeCheck: true });
-    
     if (!response.ok) return [];
     
     const data = await response.json();
-    
-    if (!data || !data.streams) {
-      console.log('[TORRENTIO] No streams found');
-      return [];
-    }
+    if (!data || !data.streams) return [];
 
-    const streams = [];
+    const tempStreams = [];
 
-    // Processa os primeiros 20 resultados (o original pegava 15)
+    // Pegamos os 20 primeiros retornos do Torrentio para processar
     for (const torrent of data.streams.slice(0, 20)) {
-      try {
-        const title = torrent.title || '';
-        const quality = extractQuality(title);
-        
-        // Match seguro para seeders
-        const seederMatch = title.match(/(?:👤|👥|Seeders:?)\s*(\d+)/i);
-        const seeders = seederMatch ? parseInt(seederMatch[1], 10) : 0;
-        
-        const language = detectLanguage(title);
-        const magnetUrl = buildMagnet(torrent.infoHash);
+      if (!torrent.infoHash) continue;
+      
+      const title = torrent.title || '';
+      const quality = extractQuality(title);
+      const lang = detectLanguage(title);
+      
+      // Captura a quantidade de seeders para ordenarmos
+      const seederMatch = title.match(/👤\s*(\d+)/);
+      const seeders = seederMatch ? parseInt(seederMatch[1], 10) : 0;
+      
+      const magnetUrl = `magnet:?xt=urn:btih:${torrent.infoHash}&${trackersString}`;
+      const langIcon = lang === 'português' ? '🇧🇷' : '🌐';
 
-        if (!magnetUrl) continue;
-
-        const langIcon = language === 'português' ? '🇧🇷' : '🌐';
-
-        streams.push({
-          url: magnetUrl,
-          quality: quality,
-          lang: language,
-          seeders: seeders,
-          title: `${langIcon} ${quality} | ${language} | 👤 ${seeders}`,
-          subtitles: [] // Opcional, exigido pela arquitetura original ofuscada
-        });
-      } catch (err) {
-        // Ignora erros individuais de loop
-      }
+      // Usamos chaves ocultas (com underline _) temporariamente para facilitar a ordenação
+      tempStreams.push({
+        _lang: lang,
+        _quality: quality,
+        _seeders: seeders,
+        url: magnetUrl,
+        quality: quality,
+        title: `${langIcon} [${quality}] | ${lang} | 👤 ${seeders}`,
+        subtitles: []
+      });
     }
 
-    // Ordenação: 1º PT-BR, 2º Qualidade, 3º Seeders
-    streams.sort((a, b) => {
-      const aIsPt = a.lang === 'português' ? 0 : 1;
-      const bIsPt = b.lang === 'português' ? 0 : 1;
-      if (aIsPt !== bIsPt) return aIsPt - bIsPt;
+    // Ordenação: 1º Português, 2º Melhor Qualidade, 3º Mais Seeders
+    tempStreams.sort((a, b) => {
+      if (a._lang === 'português' && b._lang !== 'português') return -1;
+      if (a._lang !== 'português' && b._lang === 'português') return 1;
       
       const qOrder = { '4K': 0, '1080p': 1, '720p': 2, '480p': 3 };
-      const aQ = qOrder[a.quality] || 999;
-      const bQ = qOrder[b.quality] || 999;
+      const aQ = qOrder[a._quality] || 99;
+      const bQ = qOrder[b._quality] || 99;
       if (aQ !== bQ) return aQ - bQ;
       
-      return b.seeders - a.seeders;
+      return b._seeders - a._seeders;
     });
 
-    return streams;
+    // CORREÇÃO 2: Limpa o array, removendo as variáveis temporárias.
+    // O Nuvio exige estritamente apenas as chaves (url, quality, title, subtitles).
+    const finalStreams = tempStreams.map(stream => ({
+      url: stream.url,
+      quality: stream.quality,
+      title: stream.title,
+      subtitles: stream.subtitles
+    }));
+
+    return finalStreams;
   } catch (error) {
-    console.log('[TORRENTIO] Fetch Error:', error);
     return [];
   }
 }
 
-// A EXPORTAÇÃO EXATA QUE O MOTOR DO NUVIO ESPERA
-async function getStreams(tmdbId, type, season, episode) {
-  try {
-    const imdbId = await getImdbId(tmdbId, type);
-    if (!imdbId) {
-      console.log('[NUVIO] Falha ao obter IMDB ID');
-      return [];
-    }
-    
-    console.log('[NUVIO] IMDB ID:', imdbId);
-    
-    const streams = await invokeTorrentio(imdbId, type === 'tv' ? season : null, type === 'tv' ? episode : null);
-    return streams;
-  } catch (error) {
-    console.log('[NUVIO] Erro Crítico:', error);
-    return [];
-  }
-}
-
+// O Motor do Nuvio espera esta exportação exata
 module.exports = {
   getStreams: getStreams
 };
