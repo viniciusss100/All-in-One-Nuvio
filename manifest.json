@@ -14,20 +14,19 @@
       "formats": ["mp4", "m3u8", "mkv"],
       "logo": "https://i.postimg.cc/L64M3bYV/netmirror.png",
       "contentLanguage": ["pt", "pt-br"]
-    },
+    },    
     {
-      "id": "hianime",
-      "name": "HiAnime",
-      "description": "HiAnime multi-server anime streaming with real-time mapping and subtitles",
+      "id": "animesdigital",
+      "name": "AnimesDigital",
+      "description": "Watch your favorite anime in Portuguese HD",
       "version": "1.0.0",
       "author": "Nuvio Team",
       "supportedTypes": ["movie", "tv"],
-      "filename": "providers/hianime.js",
+      "filename": "providers/animesdigital.js",
       "enabled": true,
-      "hasSettings": true,
-      "formats": ["m3u8"],
-      "logo": "https://i.postimg.cc/13SYJPTx/hianime.png",
-      "contentLanguage": ["ja", "en"]
+      "formats": ["mp4", "m3u8"],
+      "logo": "https://i.postimg.cc/vTMZgBfy/animesdigital.jpg",
+      "contentLanguage": ["pt", "ja"]
     },
     {
       "id": "torrentio",
