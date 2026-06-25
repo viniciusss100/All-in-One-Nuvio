@@ -1,1 +1,282 @@
-const _0x1687aa=_0x24e1;(function(_0x116eb8,_0x358ed8){const _0x2e4f89=_0x24e1,_0x12a6ba=_0x116eb8();while(!![]){try{const _0x3be49a=parseInt(_0x2e4f89(0xff))/0x1+parseInt(_0x2e4f89(0xf1))/0x2*(parseInt(_0x2e4f89(0xf8))/0x3)+-parseInt(_0x2e4f89(0x106))/0x4*(parseInt(_0x2e4f89(0xf5))/0x5)+parseInt(_0x2e4f89(0x10a))/0x6*(-parseInt(_0x2e4f89(0x112))/0x7)+-parseInt(_0x2e4f89(0x105))/0x8*(-parseInt(_0x2e4f89(0x107))/0x9)+parseInt(_0x2e4f89(0xf2))/0xa*(parseInt(_0x2e4f89(0x10d))/0xb)+parseInt(_0x2e4f89(0xe8))/0xc*(-parseInt(_0x2e4f89(0x117))/0xd);if(_0x3be49a===_0x358ed8)break;else _0x12a6ba['push'](_0x12a6ba['shift']());}catch(_0x5e2dfa){_0x12a6ba['push'](_0x12a6ba['shift']());}}}(_0x2e49,0x74a61));var __async=(_0x3e35a4,_0x4aa1fe,_0x5dd4f7)=>{return new Promise((_0x6604d1,_0x3ad7fd)=>{const _0x8e8990=_0x24e1;var _0x188209=_0xb4e14f=>{try{_0x93ce69(_0x5dd4f7['next'](_0xb4e14f));}catch(_0x394308){_0x3ad7fd(_0x394308);}},_0x2a85b3=_0x104a05=>{try{_0x93ce69(_0x5dd4f7['throw'](_0x104a05));}catch(_0x50766a){_0x3ad7fd(_0x50766a);}},_0x93ce69=_0xf644d2=>_0xf644d2['done']?_0x6604d1(_0xf644d2[_0x8e8990(0x10b)]):Promise['resolve'](_0xf644d2['value'])['then'](_0x188209,_0x2a85b3);_0x93ce69((_0x5dd4f7=_0x5dd4f7[_0x8e8990(0xfd)](_0x3e35a4,_0x4aa1fe))[_0x8e8990(0x10f)]());});},TMDB_API_KEY=_0x1687aa(0xfe),TORRENTIO_API=_0x1687aa(0xea),HEADERS={'User-Agent':'Mozilla/5.0\x20(Windows\x20NT\x2010.0;\x20Win64;\x20x64)\x20AppleWebKit/537.36\x20Chrome/120\x20Safari/537.36','Accept':_0x1687aa(0xfa)};function _0x24e1(_0x4b4739,_0x40c554){_0x4b4739=_0x4b4739-0xe7;const _0x2e4966=_0x2e49();let _0x24e1a0=_0x2e4966[_0x4b4739];if(_0x24e1['OZDDLM']===undefined){var _0x47b528=function(_0x51c96b){const _0x58da27='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/=';let _0x3e35a4='',_0x4aa1fe='';for(let _0x5dd4f7=0x0,_0x6604d1,_0x3ad7fd,_0x188209=0x0;_0x3ad7fd=_0x51c96b['charAt'](_0x188209++);~_0x3ad7fd&&(_0x6604d1=_0x5dd4f7%0x4?_0x6604d1*0x40+_0x3ad7fd:_0x3ad7fd,_0x5dd4f7++%0x4)?_0x3e35a4+=String['fromCharCode'](0xff&_0x6604d1>>(-0x2*_0x5dd4f7&0x6)):0x0){_0x3ad7fd=_0x58da27['indexOf'](_0x3ad7fd);}for(let _0x2a85b3=0x0,_0x93ce69=_0x3e35a4['length'];_0x2a85b3<_0x93ce69;_0x2a85b3++){_0x4aa1fe+='%'+('00'+_0x3e35a4['charCodeAt'](_0x2a85b3)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(_0x4aa1fe);};_0x24e1['kNPvwV']=_0x47b528,_0x24e1['FXCrJV']={},_0x24e1['OZDDLM']=!![];}const _0x21cb27=_0x2e4966[0x0],_0x22f7c7=_0x4b4739+_0x21cb27,_0x528382=_0x24e1['FXCrJV'][_0x22f7c7];return!_0x528382?(_0x24e1a0=_0x24e1['kNPvwV'](_0x24e1a0),_0x24e1['FXCrJV'][_0x22f7c7]=_0x24e1a0):_0x24e1a0=_0x528382,_0x24e1a0;}function extractQuality(_0x2c42fb=''){const _0x40ddeb=_0x1687aa,_0x107066=_0x2c42fb[_0x40ddeb(0x111)]();if(_0x107066[_0x40ddeb(0xef)](_0x40ddeb(0x108))||_0x107066[_0x40ddeb(0xef)]('4k'))return'4K';if(_0x107066[_0x40ddeb(0xef)](_0x40ddeb(0x114)))return _0x40ddeb(0x114);if(_0x107066[_0x40ddeb(0xef)]('720p'))return _0x40ddeb(0x102);if(_0x107066['includes']('480p'))return'480p';return _0x40ddeb(0xec);}var TRACKERS=[_0x1687aa(0x103),_0x1687aa(0x115),'udp://tracker.torrent.eu.org:451/announce','udp://exodus.desync.com:6969/announce'];function buildMagnet(_0xb9a8f7){const _0x40aca7=_0x1687aa;if(!_0xb9a8f7)return'';const _0x4512fb=TRACKERS[_0x40aca7(0xf0)](_0x57ad1d=>_0x40aca7(0xf9)+encodeURIComponent(_0x57ad1d))['join']('');return _0x40aca7(0x110)+_0xb9a8f7+_0x4512fb;}function getImdbId(_0x34d5fb,_0x11c68a){return __async(this,null,function*(){const _0x49f0d8=_0x24e1;var _0x19913e;try{const _0x3eeb9f=_0x49f0d8(0xf7)+_0x11c68a+'/'+_0x34d5fb+_0x49f0d8(0xf3)+TMDB_API_KEY+_0x49f0d8(0x101),_0x45a112=yield(yield fetch(_0x3eeb9f,{'skipSizeCheck':!![]}))['json']();return((_0x19913e=_0x45a112[_0x49f0d8(0x113)])==null?void 0x0:_0x19913e[_0x49f0d8(0xfb)])||_0x45a112[_0x49f0d8(0xfb)]||null;}catch(_0x45688d){return null;}});}function invokeTorrentio(_0x9c86b4,_0x383cf7,_0xadf1fd){return __async(this,null,function*(){const _0x474664=_0x24e1;var _0x33dfd3;try{const _0x47a940=_0x383cf7!=null&&_0xadf1fd!=null,_0x27eeec=_0x47a940?TORRENTIO_API+_0x474664(0xfc)+_0x9c86b4+':'+_0x383cf7+':'+_0xadf1fd+_0x474664(0x10e):TORRENTIO_API+'/stream/movie/'+_0x9c86b4+_0x474664(0x10e);console[_0x474664(0x10c)](_0x474664(0x116),_0x27eeec);const _0x653108=yield fetch(_0x27eeec,{'headers':HEADERS,'skipSizeCheck':!![]}),_0x3b28a8=yield _0x653108[_0x474664(0xe9)]();if(!_0x3b28a8||!_0x3b28a8[_0x474664(0xe7)])return console[_0x474664(0x10c)]('[TORRENTIO]\x20No\x20streams'),[];const _0x52e045=[];for(const _0x152226 of _0x3b28a8[_0x474664(0xe7)][_0x474664(0xf6)](0x0,0xf)){try{const _0x264363=_0x152226[_0x474664(0xed)]||'',_0x36e454=extractQuality(_0x264363),_0xe48b41=((_0x33dfd3=_0x264363['match'](/👤\s*(\d+)/))==null?void 0x0:_0x33dfd3[0x1])||'?',_0x54ad4e=buildMagnet(_0x152226[_0x474664(0x100)]);if(!_0x54ad4e)continue;_0x52e045['push']({'url':_0x54ad4e,'quality':_0x36e454,'title':_0x474664(0xee)+_0x36e454+'\x20|\x20👤\x20'+_0xe48b41,'subtitles':[]});}catch(_0x4639e0){}}return _0x52e045;}catch(_0x229da3){return console[_0x474664(0x10c)](_0x474664(0xf4),_0x229da3),[];}});}function _0x2e49(){const _0x298384=['oty0ndjyzfDZt3y','Aw5MB0HHC2G','jMfWCgvUzf90B19YzxnWB25Zzt1LEhrLCM5HBf9Pzhm','nZiWCa','DwrWoI8VDhjHy2TLCI5VCgvUDhjHy2TYlM9YzZOXmZm3l2fUBM91BMnL','w1rpuLjbiezbvefmxq','oerJAhzeva','mZaZmJy5mKroswXizG','ndm0ndu2mu9IB01TvG','mJe2mha','w1rpuLjbieLnrejD','mJq0mKLPrvbxEa','DMfSDwu','Bg9N','mte3nZbnEgXwDMq','lMPZB24','BMv4Da','BwfNBMv0oJ94Dd11CM46yNrPAdO','Dg9mB3DLCKnHC2u','mJmYneDyvMPxuG','zxH0zxjUywXFAwrZ','mta4mha','DwrWoI8VB3bLBI5ZDgvHBhrOlNnPoJGWl2fUBM91BMnL','w1rpuLjftLrjtYbvuKXD','mtuZmdmYmvztvhDNDq','C3rYzwfTCW','mtj0DKv3B3C','ANnVBG','Ahr0Chm6lY90B3jYzw50Aw8UC3rYzw0UzNvU','w1rpuLjbxsboBYbjturcieLe','vw5RBM93BG','DgL0Bgu','vg9YCMvUDgLVihWG','Aw5JBhvKzxm','BwfW','mJrnBezJBgW','nduWmgftrM5KuW','p2fWAv9RzxK9','w1rpuLjftLrjtYbfuLjpuL0','nunNsLnWBW','C2XPy2u','Ahr0Chm6lY9HCgKUDgHLBw92AwvKyI5VCMCVmY8','mta3mdm0tuzIs3bW','jNrYpq','yxbWBgLJyxrPB24VANnVBG','Aw1KyL9Pza','l3n0CMvHBs9ZzxjPzxmV','yxbWBhK','mtG2nwy0m2eWntq5y2e1mgqZndfKzdLHyJHImJLMndK'];_0x2e49=function(){return _0x298384;};return _0x2e49();}function getStreams(_0x12d264,_0x21f2b2,_0x20c981,_0x111a3e){return __async(this,null,function*(){const _0x26250d=_0x24e1;try{const _0x5927ef=yield getImdbId(_0x12d264,_0x21f2b2);if(!_0x5927ef)return console[_0x26250d(0x10c)](_0x26250d(0xeb)),[];console[_0x26250d(0x10c)](_0x26250d(0x109),_0x5927ef);const _0x118881=yield invokeTorrentio(_0x5927ef,_0x21f2b2==='tv'?_0x20c981:null,_0x21f2b2==='tv'?_0x111a3e:null);return _0x118881;}catch(_0x2262d9){return console['log'](_0x26250d(0x104),_0x2262d9),[];}});}module['exports']={'getStreams':getStreams};
+// ==========================================
+// PLUGIN TORRENTIO MELHORADO
+// Filtra e prioriza streams em português
+// ==========================================
+
+const TMDB_API_KEY = '7ab8a2e339d7f3644d075128951597b0';
+const TORRENTIO_API = 'https://torrentio.strem.io';
+
+const HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+  'Accept': 'application/json'
+};
+
+const TRACKERS = [
+  'udp://tracker.opentrackr.org:6969/announce',
+  'udp://tracker.torrent.eu.org:451/announce',
+  'udp://exodus.desync.com:6969/announce'
+];
+
+// ==========================================
+// NOVO: Detectar idioma do título
+// ==========================================
+function detectLanguage(title = '') {
+  const lowerTitle = title.toLowerCase();
+  
+  // Palavras-chave para português (Brasil e Portugal)
+  const portugueseKeywords = [
+    'portuguese',
+    'português',
+    'dublado',
+    'dublagem',
+    'brazilian',
+    'sf',
+    'dual-',
+    'pt-br',
+    'pt-pt',
+    'pob',      // Código ISO para português do Brasil
+    'por'       // Código ISO geral para português
+  ];
+  
+  // Palavras-chave para outros idiomas
+  const otherLanguages = {
+    'english': ['english', 'eng', 'en-us'],
+    'spanish': ['spanish', 'español', 'castellano', 'spa'],
+    'french': ['french', 'français', 'fra'],
+    'italian': ['italian', 'italiano', 'ita']
+  };
+  
+  // Verifica português primeiro
+  for (const keyword of portugueseKeywords) {
+    if (lowerTitle.includes(keyword)) {
+      return 'português';
+    }
+  }
+  
+  // Verifica outros idiomas
+  for (const [lang, keywords] of Object.entries(otherLanguages)) {
+    for (const keyword of keywords) {
+      if (lowerTitle.includes(keyword)) {
+        return lang;
+      }
+    }
+  }
+  
+  // Se não encontrar, assume "indefinido"
+  return 'indefinido';
+}
+
+// ==========================================
+// NOVO: Extrair qualidade (melhorado)
+// ==========================================
+function extractQuality(title = '') {
+  const lowerTitle = title.toLowerCase();
+  
+  if (lowerTitle.includes('2160p') || lowerTitle.includes('4k')) {
+    return '4K';
+  }
+  if (lowerTitle.includes('1080p')) {
+    return '1080p';
+  }
+  if (lowerTitle.includes('720p')) {
+    return '720p';
+  }
+  if (lowerTitle.includes('480p')) {
+    return '480p';
+  }
+  return '720p';
+}
+
+// ==========================================
+// NOVO: Contar seeders
+// ==========================================
+function extractSeeders(title = '') {
+  const match = title.match(/👤\s*(\d+)/);
+  return match ? parseInt(match[1]) : 0;
+}
+
+// ==========================================
+// Construir magnet link
+// ==========================================
+function buildMagnet(infoHash) {
+  if (!infoHash) return '';
+  
+  const trackerParams = TRACKERS
+    .map(tracker => '&tr=' + encodeURIComponent(tracker))
+    .join('');
+  
+  return 'magnet:?xt=urn:btih:' + infoHash + trackerParams;
+}
+
+// ==========================================
+// Buscar ID IMDB no TMDB
+// ==========================================
+async function getImdbId(movieId, type) {
+  try {
+    const url = `https://api.themoviedb.org/3/${type}/${movieId}/external_ids?api_key=${TMDB_API_KEY}&language=pt-BR`;
+    
+    const response = await fetch(url, { skipSizeCheck: true });
+    const data = await response.json();
+    
+    return data.external_ids?.imdb_id || data.imdb_id || null;
+  } catch (error) {
+    console.log('Erro ao buscar IMDB ID:', error);
+    return null;
+  }
+}
+
+// ==========================================
+// MELHORADO: Buscar streams com filtro de idioma
+// ==========================================
+async function invokeTorrentio(imdbId, season, episode) {
+  try {
+    const hasSeasonEpisode = season != null && episode != null;
+    const url = hasSeasonEpisode 
+      ? `${TORRENTIO_API}/stream/series/${imdbId}:${season}:${episode}.json`
+      : `${TORRENTIO_API}/stream/movie/${imdbId}.json`;
+    
+    console.log('[TORRENTIO] URL:', url);
+    
+    const response = await fetch(url, { headers: HEADERS, skipSizeCheck: true });
+    const data = await response.json();
+    
+    if (!data || !data.streams) {
+      console.log('[TORRENTIO] Sem streams encontrados');
+      return [];
+    }
+    
+    // Processa TODOS os streams (não limita a 15)
+    const processedStreams = [];
+    
+    for (const torrent of data.streams) {
+      try {
+        const title = torrent.title || '';
+        const quality = extractQuality(title);
+        const seeders = extractSeeders(title);
+        const language = detectLanguage(title);
+        const magnet = buildMagnet(torrent.infoHash);
+        
+        if (!magnet) continue;
+        
+        // Adiciona informação de idioma ao título
+        const languageIcon = language === 'português' ? '🇧🇷' : '🌐';
+        
+        processedStreams.push({
+          url: magnet,
+          quality: quality,
+          title: `${languageIcon} [${quality}] | ${language} | 👤 ${seeders}`,
+          subtitles: [],
+          // Adiciona propriedades auxiliares para ordenação
+          _language: language,
+          _seeders: seeders,
+          _quality: quality
+        });
+      } catch (error) {
+        // Continua
+      }
+    }
+    
+    // ✨ ORDENAÇÃO INTELIGENTE ✨
+    // 1º: Português (prioridade 1)
+    // 2º: Qualidade (1080p > 720p > 480p)
+    // 3º: Número de seeders (mais seeders = melhor)
+    
+    processedStreams.sort((a, b) => {
+      // Prioridade 1: Idioma (português em primeiro)
+      const aIsPortuguese = a._language === 'português' ? 0 : 1;
+      const bIsPortuguese = b._language === 'português' ? 0 : 1;
+      
+      if (aIsPortuguese !== bIsPortuguese) {
+        return aIsPortuguese - bIsPortuguese;
+      }
+      
+      // Prioridade 2: Qualidade (ordem: 4K > 1080p > 720p > 480p)
+      const qualityOrder = { '4K': 0, '1080p': 1, '720p': 2, '480p': 3 };
+      const aQuality = qualityOrder[a._quality] || 999;
+      const bQuality = qualityOrder[b._quality] || 999;
+      
+      if (aQuality !== bQuality) {
+        return aQuality - bQuality;
+      }
+      
+      // Prioridade 3: Seeders (mais seeders = melhor)
+      return b._seeders - a._seeders;
+    });
+    
+    // Remove as propriedades auxiliares antes de retornar
+    return processedStreams.map(stream => {
+      const { _language, _seeders, _quality, ...clean } = stream;
+      return clean;
+    });
+    
+  } catch (error) {
+    console.log('[ERRO] Torrentio:', error);
+    return [];
+  }
+}
+
+// ==========================================
+// Função principal: Obter streams
+// ==========================================
+async function getStreams(movieId, type, season, episode) {
+  try {
+    const imdbId = await getImdbId(movieId, type);
+    
+    if (!imdbId) {
+      console.log('[ERRO] IMDB ID não encontrado');
+      return [];
+    }
+    
+    console.log('[SUCESSO] IMDB ID encontrado:', imdbId);
+    
+    const streams = await invokeTorrentio(
+      imdbId, 
+      type === 'tv' ? season : null, 
+      type === 'tv' ? episode : null
+    );
+    
+    // Log dos resultados (útil para debug)
+    console.log('[STREAMS] Total encontrado:', streams.length);
+    streams.slice(0, 5).forEach((s, i) => {
+      console.log(`  ${i + 1}. ${s.title}`);
+    });
+    
+    return streams;
+  } catch (error) {
+    console.log('[ERRO] getStreams:', error);
+    return [];
+  }
+}
+
+module.exports = { getStreams };
+
+// ==========================================
+// RESUMO DAS ALTERAÇÕES
+// ==========================================
+/*
+✅ ADICIONADO:
+1. detectLanguage() - identifica idioma no título
+2. extractSeeders() - extrai quantidade de seeders
+3. Priorização em 3 níveis:
+   - 1º lugar: Streams em português 🇧🇷
+   - 2º lugar: Melhor qualidade (1080p antes de 720p)
+   - 3º lugar: Mais seeders (mais estável)
+
+✅ MELHORIAS NO VISUAL:
+- 🇧🇷 mostra português
+- 🌐 mostra outros idiomas
+- Mostra idioma no título
+- Processa TODOS os streams (não limita a 15)
+
+📊 EXEMPLO DE SAÍDA:
+  1. 🇧🇷 [1080p] | português | 👤 150
+  2. 🇧🇷 [720p] | português | 👤 200
+  3. 🌐 [1080p] | english | 👤 500
+  4. 🌐 [1080p] | spanish | 👤 120
+
+💡 PRÓXIMAS MELHORIAS POSSÍVEIS:
+- Filtrar por qualidade mínima
+- Suportar legendas em português
+- Detectar se é dublado ou legendado
+- Cache de resultados
+*/
