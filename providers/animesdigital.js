@@ -546,8 +546,8 @@ function toStream(sx, info, animeSlug, season, episode, relevance, isDubbed) {
 
   return {
     _relevance: relevance || 0,
-    name: PROVIDER_TAG + " · " + (sx.type === "hls" ? "HLS" : "MP4"),
-    title: titleBase + epTag + arcSuffix + " [PT-BR " + flag + "]",
+    name: "▶ AnimesDigital",
+    title: titleBase + epTag + arcSuffix + "\n📺 " + (sx.quality || "Auto") + " | 🗣️ " + (isDubbed ? "Dublado" : "Legendado"),
     quality: sx.quality || "Auto",
     url: sx.url,
     type: sx.type,
