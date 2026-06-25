@@ -461,8 +461,8 @@ function getStreams(tmdbId, type, season, episode) {
           console.log("[" + PROVIDER_TAG + "] OK score=" + score.toFixed(2) + " flag=" + flag);
 
           streams.push({
-              name: "[+] Anitube",
-              title: displayTitle + " · EP " + targetEp + "\nRes: " + (sx.quality || "Auto") + " | Idioma: " + (isDubbed ? "Dublado" : "Legendado"),
+              name: 'Anitube (' + (isDubbed ? "DUB" : "LEG") + ')',
+              title: displayTitle + " · EP " + targetEp,
               quality: sx.quality || "Auto",
               url: sx.url,
               type: sx.type,
