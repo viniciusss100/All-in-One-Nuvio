@@ -1,11 +1,10 @@
 // Nuvio Provider - Anitube (anitube.vip)
-// Resiliência: Múltiplos idiomas (TMDB), URLs Relativas e Extração de Iframes.
+// Modo "Chute Inteligente" e Diagnóstico de Cloudflare
 
 "use strict";
 
 var TMDB_API_KEY = "68e094699525b18a70bab2f86b1fa706";
-var BASE_URL = "https://anitube.vip"; 
-var PROVIDER_TAG = "Anitube";
+var BASE_URL = "https://www.anitube.vip"; // O "www." previne muitos redirects que quebram o fetch
 var USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/137.0.0.0 Safari/537.36";
 
 var __async = function (__this, __arguments, generator) {
@@ -29,36 +28,25 @@ function fetchText(url) {
 function getTmdbInfo(id, type) {
   return __async(this, null, function* () {
     try {
-      var isImdb = String(id).indexOf("tt") === 0;
-      var data = null;
+      // Limpa a string do ID caso o Nuvio mande algo como "tmdb:12345"
+      var cleanId = String(id).replace(/[^a-zA-Z0-9]/g, ""); 
+      var isImdb = cleanId.indexOf("tt") === 0;
 
       if (isImdb) {
-         var findUrl = "https://api.themoviedb.org/3/find/" + id + "?api_key=" + TMDB_API_KEY + "&external_source=imdb_id&language=pt-BR";
+         var findUrl = "https://api.themoviedb.org/3/find/" + cleanId + "?api_key=" + TMDB_API_KEY + "&external_source=imdb_id&language=pt-BR";
          var fRes = yield fetch(findUrl);
          var fData = yield fRes.json();
          var results = type === "tv" ? fData.tv_results : fData.movie_results;
-         if (results && results.length > 0) data = results[0];
+         if (results && results.length > 0) return { title: results[0].name || results[0].title, original: results[0].original_name || results[0].original_title };
       } else {
-         var url = "https://api.themoviedb.org/3/" + type + "/" + id + "?api_key=" + TMDB_API_KEY + "&language=pt-BR";
+         var url = "https://api.themoviedb.org/3/" + type + "/" + cleanId + "?api_key=" + TMDB_API_KEY + "&language=pt-BR";
          var res = yield fetch(url);
-         data = yield res.json();
-      }
-
-      if (data) {
-          // Coletamos Título em PT-BR e o Título Original para aumentar as chances na busca
-          return {
-              title: data.name || data.title || null,
-              originalTitle: data.original_name || data.original_title || null
-          };
+         var data = yield res.json();
+         return { title: data.name || data.title, original: data.original_name || data.original_title };
       }
       return null;
     } catch (e) { return null; }
   });
-}
-
-function normalizeTitle(str) {
-    if (!str) return "";
-    return str.toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function getStreams(id, type, season, episode) {
@@ -67,109 +55,117 @@ function getStreams(id, type, season, episode) {
       if (type !== "tv") return [];
 
       var info = yield getTmdbInfo(id, type);
-      if (!info || (!info.title && !info.originalTitle)) return [];
+      if (!info || (!info.title && !info.original)) return [];
 
       var targetEp = episode || 1;
       
-      // Cria uma fila de buscas: PT-BR -> Nome Original -> Primeira Palavra do Nome
-      var queries = [];
-      if (info.title) queries.push(info.title);
-      if (info.originalTitle && info.originalTitle !== info.title) queries.push(info.originalTitle);
-      if (info.title && info.title.indexOf(' ') !== -1) queries.push(info.title.split(' ')[0]);
+      // Tenta o título Original Japonês primeiro (O Anitube quase sempre usa esse)
+      var query = info.original || info.title;
+      var searchUrl = BASE_URL + "/?s=" + encodeURIComponent(query);
+      
+      var searchRes = yield fetchText(searchUrl);
 
-      var animeLink = null;
-
-      // 1. Tenta achar a página do anime usando as diferentes buscas
-      for (var i = 0; i < queries.length; i++) {
-          var q = queries[i];
-          var searchUrl = BASE_URL + "/?s=" + encodeURIComponent(q);
-          var searchRes = yield fetchText(searchUrl);
-          
-          if (searchRes.status === 200 && searchRes.text) {
-              var animeRe = /href=["']((?:https?:\/\/[^\/]+)?\/(?:anime|animes)\/[^"']+)["']/gi;
-              var match;
-              var normQuery = normalizeTitle(q).split(' ')[0];
-
-              while ((match = animeRe.exec(searchRes.text)) !== null) {
-                  var urlA = match[1];
-                  if (urlA.indexOf("http") !== 0) urlA = BASE_URL + urlA; // Corrige link relativo
-                  var slug = urlA.split('/').filter(Boolean).pop();
-                  
-                  if (normalizeTitle(slug).indexOf(normQuery) !== -1) {
-                      animeLink = urlA;
-                      break;
-                  }
-              }
-          }
-          if (animeLink) break; // Se achou, para de tentar buscar outros nomes
+      // --- 🚨 DETECTOR DE CLOUDFLARE 🚨 ---
+      // Se aparecer isso na sua tela do Nuvio, o site barrou o seu celular.
+      if (searchRes.status === 403 || searchRes.status === 503) {
+          return [{ url: BASE_URL, quality: "Erro", title: "❌ Anitube: Bloqueado pelo Cloudflare", type: "web" }];
       }
 
-      if (!animeLink) return [];
+      if (searchRes.status !== 200 || !searchRes.text) {
+          // Tenta de novo com o título em Português se o servidor não respondeu bem
+          searchUrl = BASE_URL + "/?s=" + encodeURIComponent(info.title);
+          searchRes = yield fetchText(searchUrl);
+          if (searchRes.status !== 200 || !searchRes.text) return [];
+      }
 
-      // 2. Entra na página do Anime e procura o Episódio Correto
+      // 1. Extrai links de animes da página de busca
+      var animeRe = /href=["']((?:https?:\/\/[^\/]+)?\/(?:anime|animes)\/[^"']+)["']/gi;
+      var animeLinks = [];
+      var match;
+
+      while ((match = animeRe.exec(searchRes.text)) !== null) {
+          var urlA = match[1];
+          if (urlA.indexOf("http") !== 0) urlA = BASE_URL + urlA; // Corrige links relativos
+          if (animeLinks.indexOf(urlA) === -1) animeLinks.push(urlA);
+      }
+
+      if (animeLinks.length === 0) return [];
+
+      // Pega o PRIMEIRO resultado. A busca nativa deles costuma ser precisa.
+      var animeLink = animeLinks[0]; 
+
+      // 2. Entra na página do Anime e procura o Episódio
       var animeRes = yield fetchText(animeLink);
       if (animeRes.status !== 200) return [];
 
       var epLink = null;
-      // Captura o link e o texto dentro da tag <a> do episódio
-      var epBlockRe = /<a[^>]+href=["']((?:https?:\/\/[^\/]+)?\/(?:video|episodio|episodios)\/[^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-      
-      while ((match = epBlockRe.exec(animeRes.text)) !== null) {
+      var epRe = /href=["']((?:https?:\/\/[^\/]+)?\/(?:video|episodio|episodios)\/[^"']+)["']/gi;
+      var epLinksEncontrados = [];
+
+      while ((match = epRe.exec(animeRes.text)) !== null) {
           var linkE = match[1];
-          var innerText = match[2];
           if (linkE.indexOf("http") !== 0) linkE = BASE_URL + linkE;
+          epLinksEncontrados.push(linkE);
+      }
 
-          // Procura o número no Link OU no Texto Visível para o usuário
-          var numInLink = linkE.match(/-(?:episodio|ep)-?0*(\d+)/i) || linkE.match(/-0*(\d+)\/?$/i);
-          var numInText = innerText.match(/(?:epis[oó]dio|ep)\s*0*(\d+)/i) || innerText.match(/\b0*(\d+)\b/);
-          
-          var isCorrectEp = (numInLink && parseInt(numInLink[1], 10) === parseInt(targetEp, 10)) || 
-                            (numInText && parseInt(numInText[1], 10) === parseInt(targetEp, 10));
-
-          if (isCorrectEp) {
-              epLink = linkE;
+      // Procura exatamente o número do episódio na URL
+      for (var i = 0; i < epLinksEncontrados.length; i++) {
+          var lnk = epLinksEncontrados[i];
+          var epMatch = lnk.match(/-(?:episodio|ep)-?0*(\d+)\/?$/i) || lnk.match(/-0*(\d+)\/?$/i);
+          if (epMatch && parseInt(epMatch[1], 10) === parseInt(targetEp, 10)) {
+              epLink = lnk;
               break;
           }
       }
 
-      // Fallback
+      // Fallback extremo
       if (!epLink) {
           epLink = animeLink.replace("/anime/", "/video/") + "-episodio-" + targetEp;
       }
 
-      // 3. Entra na página do Episódio e arranca o Player
+      // 3. Entra no Episódio e Arranca o Iframe/Video
       var epRes = yield fetchText(epLink);
       if (epRes.status !== 200) return [];
 
       var finalUrl = null;
       var isIframe = false;
 
-      var mp4Match = epRes.text.match(/(https?:\/\/[^\s"'<>]+(?:m3u8|mp4)[^\s"'<>]*)/i);
+      // 3.1 Procura vídeo direto (M3U8 / MP4)
+      var mp4Match = epRes.text.match(/(https?:\/\/[^\s"'<>]+(?:\.m3u8|\.mp4)[^\s"'<>]*)/i);
       if (mp4Match) {
           finalUrl = mp4Match[1];
       } else {
-          var iframeMatch = epRes.text.match(/<iframe[^>]+src=["']([^"']+)["']/i);
-          if (iframeMatch) {
-              finalUrl = iframeMatch[1];
-              if (finalUrl.indexOf("http") !== 0) finalUrl = "https:" + finalUrl;
-              isIframe = true;
+          // 3.2 Procura Iframes (Omitindo iframes de redes sociais)
+          var iframeRe = /<iframe[^>]+src=["']([^"']+)["']/gi;
+          while ((match = iframeRe.exec(epRes.text)) !== null) {
+              var src = match[1];
+              if (src.indexOf("facebook") === -1 && src.indexOf("disqus") === -1) {
+                  finalUrl = src;
+                  if (finalUrl.indexOf("http") !== 0) finalUrl = "https:" + finalUrl;
+                  isIframe = true;
+                  break;
+              }
           }
       }
 
-      if (!finalUrl) return [];
+      if (!finalUrl) {
+          // Para ajudar no diagnóstico, mostra que achou a página mas não achou o player
+          return [{ url: epLink, quality: "Erro", title: "❌ Anitube: Player não encontrado no HTML", type: "web" }];
+      }
 
       var typeStr = "mp4";
       if (finalUrl.indexOf(".m3u8") !== -1) typeStr = "hls";
       else if (isIframe) typeStr = "web";
 
-      var displayTitle = info.title || info.originalTitle || "Anitube";
+      var displayTitle = info.title || "Anime";
 
       return [{
         url: finalUrl,
         quality: "720p",
         title: "🇧🇷 [Anitube] " + displayTitle + " · EP " + targetEp,
         type: typeStr,
-        behaviorHints: { notWebReady: !isIframe }
+        // Nuvio lê 'type: web' para abrir o navegador interno. Omitimos notWebReady para Iframes tocarem.
+        behaviorHints: { notWebReady: !isIframe } 
       }];
 
     } catch (error) {
