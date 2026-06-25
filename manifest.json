@@ -2,18 +2,26 @@
   "name": "All-in-One-Nuvio",
   "version": "1.0.0",
   "scrapers": [
-        {
+    {
       "id": "brazucaplay",
       "name": "BrazucaPlay",
       "description": "BrazucaPlay - Filmes, Séries e Animes em Português (comunidade Brazuca)",
       "version": "1.0.0",
       "author": "Brazuca Community",
-      "supportedTypes": ["movie", "tv"],
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
       "filename": "providers/brazucaplay.js",
       "enabled": true,
-      "formats": ["m3u8", "mp4"],
+      "formats": [
+        "m3u8",
+        "mp4"
+      ],
       "logo": "https://raw.githubusercontent.com/skyrisk/brazucaplay/master/addons/logo.png",
-      "contentLanguage": ["pt"]
+      "contentLanguage": [
+        "pt"
+      ]
     },
     {
       "id": "netmirror",
@@ -21,25 +29,44 @@
       "description": "Netflix | Prime | Disney",
       "version": "1.0.0",
       "author": "Dustincos",
-      "supportedTypes": ["movie", "tv"],
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
       "filename": "providers/netmirror.js",
       "enabled": true,
-      "formats": ["mp4", "m3u8", "mkv"],
+      "formats": [
+        "mp4",
+        "m3u8",
+        "mkv"
+      ],
       "logo": "https://i.postimg.cc/L64M3bYV/netmirror.png",
-      "contentLanguage": ["pt", "pt-br"]
-    },    
+      "contentLanguage": [
+        "pt",
+        "pt-br"
+      ]
+    },
     {
       "id": "animesdigital",
       "name": "AnimesDigital",
       "description": "Watch your favorite anime in Portuguese HD",
       "version": "1.0.0",
       "author": "Nuvio Team",
-      "supportedTypes": ["movie", "tv"],
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
       "filename": "providers/animesdigital.js",
       "enabled": true,
-      "formats": ["mp4", "m3u8"],
+      "formats": [
+        "mp4",
+        "m3u8"
+      ],
       "logo": "https://i.postimg.cc/vTMZgBfy/animesdigital.jpg",
-      "contentLanguage": ["pt", "ja"]
+      "contentLanguage": [
+        "pt",
+        "ja"
+      ]
     },
     {
       "id": "anitube",
@@ -47,24 +74,97 @@
       "description": "Provedor de animes pt-br.",
       "version": "1.0.0",
       "author": "Vinicius",
-      "supportedTypes": ["movie", "tv"],
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
       "filename": "providers/anitube.js",
       "enabled": true,
-      "formats": ["mp4", "m3u8"],
+      "formats": [
+        "mp4",
+        "m3u8"
+      ],
       "logo": "https://i.postimg.cc/vTMZgBfy/animesdigital.jpg",
-      "contentLanguage": ["pt", "ja"]
+      "contentLanguage": [
+        "pt",
+        "ja"
+      ]
+    },
+    {
+      "id": "fshd",
+      "name": "[Saimuel] FSHD",
+      "description": "FSHD - API | 1080p",
+      "version": "1.0.0",
+      "author": "saimuel",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "https://raw.githubusercontent.com/saimuelbr/saimuel-nuvio-repo/main/providers/fshd.js",
+      "enabled": true,
+      "formats": [
+        "m3u8"
+      ],
+      "contentLanguage": [
+        "pt"
+      ]
+    },
+    {
+      "id": "megaembed",
+      "name": "[Saimuel] MegaEmbed",
+      "description": "MegaEmbed - API| 1080p/720p",
+      "version": "1.0.0",
+      "author": "saimuel",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "https://raw.githubusercontent.com/saimuelbr/saimuel-nuvio-repo/main/providers/megaembed.js",
+      "enabled": true,
+      "formats": [
+        "m3u8"
+      ],
+      "contentLanguage": [
+        "pt"
+      ]
+    },
+    {
+      "id": "peachify",
+      "name": "[Saimuel] Peachify",
+      "description": "Peachify - API | 1080p",
+      "version": "1.0.0",
+      "author": "saimuel",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "https://raw.githubusercontent.com/saimuelbr/saimuel-nuvio-repo/main/providers/peachify.js",
+      "enabled": true,
+      "formats": [
+        "m3u8"
+      ],
+      "contentLanguage": [
+        "pt"
+      ]
     },
     {
       "id": "redeflix",
-      "name": "RedeFlix",
+      "name": "[Saimuel] RedeFlix",
       "description": "RedeFlix - API | 1080p",
       "version": "1.0.0",
       "author": "saimuel",
-      "supportedTypes": ["movie", "tv"],
-      "filename": "https://github.com/saimuelbr/saimuel-nuvio-repo/blob/main/providers/redeflix.js",
+      "supportedTypes": [
+        "movie",
+        "tv"
+      ],
+      "filename": "https://raw.githubusercontent.com/saimuelbr/saimuel-nuvio-repo/main/providers/redeflix.js",
       "enabled": true,
-      "formats": ["m3u8"],
-      "contentLanguage": ["pt"]
+      "formats": [
+        "m3u8"
+      ],
+      "contentLanguage": [
+        "pt"
+      ]
     }
   ]
 }
