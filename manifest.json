@@ -29,18 +29,17 @@
       "contentLanguage": ["pt", "ja"]
     },
     {
-      "id": "nuvio-pt-br",
-      "name": "🇧🇷 Nuvio PT-BR Prioritário",
-      "description": "Provedor com Torrentio, prioridade PT-BR e Múltiplos Trackers.",
-      "version": "1.1.0",
+      "id": "anitube",
+      "name": "Anitube",
+      "description": "Provedor de animes pt-br.",
+      "version": "1.0.0",
       "author": "Vinicius",
       "supportedTypes": ["movie", "tv"],
-      "filename": "providers/torrentio.js",
+      "filename": "providers/anitube.js",
       "enabled": true,
-      "hasSettings": true,
       "formats": ["mp4", "m3u8"],
-      "logo": "https://i.postimg.cc/ZRYTCy0T/torrentio.png",
-      "contentLanguage": ["pt-BR", "en"]
+      "logo": "https://i.postimg.cc/vTMZgBfy/animesdigital.jpg",
+      "contentLanguage": ["pt", "ja"]
     }
   ]
 }
