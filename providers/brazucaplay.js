@@ -130,10 +130,10 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
         
         if (directUrl && (directUrl.includes('.mp4') || directUrl.includes('.m3u8') || directUrl.startsWith('http'))) {
           let resolution = directUrl.includes('FHD') ? '1080p' : (directUrl.includes('HD') ? '720p' : 'Auto');
-          let lang = (r.slug && r.slug.includes('legendado')) ? 'Legendado' : (r.slug && r.slug.includes('dublado') ? 'Dublado' : 'PT-BR / Multi');
+          let lang = (r.slug && r.slug.includes('legendado')) ? 'Legendado' : (r.slug && r.slug.includes('dublado') ? 'Dublado' : 'PT-BR');
           streams.push({
             name: 'BrazucaPlay',
-            title: 'Servidor ' + r.id + ' (Geek)\n📺 ' + resolution + ' | 🗣️ ' + lang,
+            title: 'Servidor ' + r.id + ' (Geek)\nRes: ' + resolution + ' | Idioma: ' + lang,
             url: directUrl,
             quality: resolution,
             size: 'Unknown',
@@ -163,7 +163,7 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
       // Adicionamos o Embed.su (Multi-legendas incluindo PT-BR)
       streams.push({
          name: 'BrazucaPlay',
-         title: 'Servidor Global\n📺 Auto | 🗣️ Multi-Subs',
+         title: 'Servidor Global\nRes: Auto | Idioma: Multi-Subs',
          url: embedSu,
          quality: 'Auto',
          size: 'Unknown',
@@ -173,7 +173,7 @@ async function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
       // Adicionamos o WarezCDN (PT-BR) para quando o domínio voltar a estabilizar
       streams.push({
          name: 'BrazucaPlay',
-         title: 'Servidor Warez\n📺 Auto | 🗣️ PT-BR',
+         title: 'Servidor Warez\nRes: Auto | Idioma: PT-BR',
          url: warezCdn,
          quality: 'Auto',
          size: 'Unknown',
